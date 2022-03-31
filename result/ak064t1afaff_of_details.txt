@@ -1,0 +1,13 @@
+Input:E:\New_OpenFace\Datasets\UNBC\Images\064-ak064\ak064t1afaff
+Input full path:E:\New_OpenFace\Datasets\UNBC\Images\064-ak064\ak064t1afaff
+Camera parameters:262.5,262.5,176,120
+Output HOG:ak064t1afaff.hog
+Output video:ak064t1afaff.avi
+Output aligned directory:ak064t1afaff_aligned
+Output csv:ak064t1afaff.csv
+Gaze: 1
+AUs: 1
+Landmarks 2D: 1
+Landmarks 3D: 1
+Pose: 1
+Shape parameters: 1
