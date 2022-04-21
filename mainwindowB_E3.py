@@ -5,7 +5,6 @@
 # Created by: PyQt5 UI code generator 5.14.2
 #
 # WARNING! All changes made in this file will be lost!
-
 import os
 import shutil
 import sys, time
@@ -20,6 +19,8 @@ from exe_in_pic_out_res import *
 import cv2
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QImage, QPixmap
+
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 
 class Ui_MainWindow(object):
@@ -41,7 +42,7 @@ class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(945, 613)
+        MainWindow.resize(985, 613)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.centralwidget)
@@ -70,67 +71,85 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_2.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_2.addItem(spacerItem)
         self.button_video = QtWidgets.QPushButton(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.button_video.sizePolicy().hasHeightForWidth())
         self.button_video.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
-        font.setFamily("宋体")
-        font.setPointSize(12)
+        font.setFamily("黑体")
+        font.setPointSize(14)
         self.button_video.setFont(font)
         self.button_video.setObjectName("button_video")
         self.horizontalLayout_2.addWidget(self.button_video)
+        spacerItem1 = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_2.addItem(spacerItem1)
         self.button_recognize = QtWidgets.QPushButton(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.button_recognize.sizePolicy().hasHeightForWidth())
         self.button_recognize.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
-        font.setFamily("宋体")
-        font.setPointSize(12)
+        font.setFamily("黑体")
+        font.setPointSize(14)
         self.button_recognize.setFont(font)
         self.button_recognize.setObjectName("button_recognize")
         self.horizontalLayout_2.addWidget(self.button_recognize)
+        spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_2.addItem(spacerItem2)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_3.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
+        spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_3.addItem(spacerItem3)
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
         font = QtGui.QFont()
         font.setFamily("黑体")
-        font.setPointSize(11)
+        font.setPointSize(13)
         self.label_2.setFont(font)
         self.label_2.setAlignment(QtCore.Qt.AlignCenter)
         self.label_2.setObjectName("label_2")
         self.horizontalLayout_3.addWidget(self.label_2)
+        spacerItem4 = QtWidgets.QSpacerItem(5, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_3.addItem(spacerItem4)
         self.lineEdit_treatement_time = QtWidgets.QLineEdit(self.centralwidget)
         self.lineEdit_treatement_time.setMinimumSize(QtCore.QSize(0, 5))
         self.lineEdit_treatement_time.setMaximumSize(QtCore.QSize(50, 16777215))
+        font = QtGui.QFont()
+        font.setFamily("黑体")
+        font.setPointSize(13)
+        self.lineEdit_treatement_time.setFont(font)
         self.lineEdit_treatement_time.setObjectName("lineEdit_treatement_time")
         self.horizontalLayout_3.addWidget(self.lineEdit_treatement_time)
+        spacerItem5 = QtWidgets.QSpacerItem(5, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_3.addItem(spacerItem5)
         self.label = QtWidgets.QLabel(self.centralwidget)
         font = QtGui.QFont()
         font.setFamily("黑体")
-        font.setPointSize(11)
+        font.setPointSize(13)
         self.label.setFont(font)
         self.label.setAlignment(QtCore.Qt.AlignCenter)
         self.label.setObjectName("label")
         self.horizontalLayout_3.addWidget(self.label)
         self.button_medicare = QtWidgets.QPushButton(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.button_medicare.sizePolicy().hasHeightForWidth())
         self.button_medicare.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
-        font.setFamily("宋体")
-        font.setPointSize(12)
+        font.setFamily("黑体")
+        font.setPointSize(14)
         self.button_medicare.setFont(font)
         self.button_medicare.setObjectName("button_medicare")
         self.horizontalLayout_3.addWidget(self.button_medicare)
+        spacerItem6 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_3.addItem(spacerItem6)
         self.verticalLayout.addLayout(self.horizontalLayout_3)
         self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_5.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
@@ -141,9 +160,22 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.textBrowser.sizePolicy().hasHeightForWidth())
         self.textBrowser.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setFamily("黑体")
+        font.setPointSize(11)
+        self.textBrowser.setFont(font)
         self.textBrowser.setObjectName("textBrowser")
         self.horizontalLayout_5.addWidget(self.textBrowser)
         self.verticalLayout.addLayout(self.horizontalLayout_5)
+        spacerItem7 = QtWidgets.QSpacerItem(20, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        self.verticalLayout.addItem(spacerItem7)
+        self.textBrowser_2 = QtWidgets.QTextBrowser(self.centralwidget)
+        font = QtGui.QFont()
+        font.setFamily("黑体")
+        font.setPointSize(12)
+        self.textBrowser_2.setFont(font)
+        self.textBrowser_2.setObjectName("textBrowser_2")
+        self.verticalLayout.addWidget(self.textBrowser_2)
         self.horizontalLayout_4.addLayout(self.verticalLayout)
         self.verticalLayout_3 = QtWidgets.QVBoxLayout()
         self.verticalLayout_3.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
@@ -163,7 +195,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.addLayout(self.horizontalLayout_4)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 945, 26))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 985, 26))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -182,6 +214,11 @@ class Ui_MainWindow(object):
         self.label_2.setText(_translate("MainWindow", "建议"))
         self.label.setText(_translate("MainWindow", "分钟治疗"))
         self.button_medicare.setText(_translate("MainWindow", "启动治疗"))
+        self.textBrowser.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'黑体\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>"))
 
         self.button_video.clicked.connect(self.th1)
         self.button_recognize.clicked.connect(self.start_detect)
@@ -206,7 +243,7 @@ class Ui_MainWindow(object):
 
     def th3(self):
         """
-        线程2：连接 show_most_img
+        线程3：连接 set_treatment_time
         :return:
         """
         t3 = threading.Thread(target=self.set_treatment_time, name='t3')
@@ -248,7 +285,7 @@ class Ui_MainWindow(object):
             os.mkdir('./data_set')
         self.button_flag = 1
 
-        cam = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+        cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
         cam.set(3, 800)  # set video width
         cam.set(4, 600)  # set video height
         framerate = 4  # set frame

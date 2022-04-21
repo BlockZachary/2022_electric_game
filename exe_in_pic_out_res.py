@@ -279,9 +279,11 @@ if __name__ == '__main__':
     # 第一步，读取in_dir并执行exe，将结果输出到out_dir-->csv
     # 要处理的图片/视频路径
     # in_dir = r"E:\New_OpenFace\Datasets\UNBC\Images\064-ak064\ak064t1afaff"  # 这个路径是你的待识别图像的路径，路径必须完整
-    in_dir = r"E:\※学习资料※\postgraduate\210721疼痛识别小系统\03用python执行exe\data_set"
+    # in_dir = r"E:\※学习资料※\postgraduate\210721疼痛识别小系统\03用python执行exe\data_set"
+    in_dir = os.path.abspath("./data_set")
     # csv输出路径
-    out_dir = r"E:\※学习资料※\postgraduate\210721疼痛识别小系统\03用python执行exe\result"  # 这个是在当前项目文件夹下的result文件夹，路径必须完整
+    # out_dir = r"E:\※学习资料※\postgraduate\210721疼痛识别小系统\03用python执行exe\result"  # 这个是在当前项目文件夹下的result文件夹，路径必须完整
+    out_dir = os.path.abspath("./result")
     execute_pic(in_dir, out_dir)
     print("[info]特征点获取完成")
 
