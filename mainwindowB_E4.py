@@ -213,3 +213,6 @@ class Ui_MainWindow(object):
         item = self.tableWidget.item(0, 1)
         item.setText(_translate("MainWindow", "Weak"))
         self.tableWidget.setSortingEnabled(__sortingEnabled)
+
+if __name__ == '__main__':
+    print('hello')

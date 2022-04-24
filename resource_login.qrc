@@ -3,6 +3,7 @@
     <file>素材库/71851-doctor-with-mobile_wps图片_29.png</file>
   </qresource>
   <qresource prefix="icons">
+    <file>素材库/login.ico</file>
     <file>素材库/exit.ico</file>
     <file>素材库/register-18-383390.png</file>
     <file>素材库/101692-unlock.gif</file>
