@@ -1,5 +1,6 @@
 # _*_coding:utf-8_*_
 # Author： Zachary
+import pymysql
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtWidgets import QTableWidgetItem, QMessageBox
@@ -17,6 +18,9 @@ class Ui(Ui_MainWindow):
         self.video_flag = 0
         self.BN = train_BN('traindata.csv')
         self.most_pain_index = 0
+
+        self.conn = pymysql.connect(user='root', password='980226', database='pain', use_unicode=True)
+        self.cursor = self.conn.cursor()
 
         # try:
         #     address = "192.168.1.112"  # 8266的服务器的ip地址
@@ -38,13 +42,48 @@ class Ui(Ui_MainWindow):
         # 加阴影
         self.label.setGraphicsEffect(QtWidgets.QGraphicsDropShadowEffect(blurRadius=25, xOffset=0, yOffset=0))
         self.label_2.setGraphicsEffect(QtWidgets.QGraphicsDropShadowEffect(blurRadius=25, xOffset=0, yOffset=0))
+        self.label_9.setGraphicsEffect(QtWidgets.QGraphicsDropShadowEffect(blurRadius=5, xOffset=0, yOffset=0))
+        self.label_11.setGraphicsEffect(QtWidgets.QGraphicsDropShadowEffect(blurRadius=5, xOffset=0, yOffset=0))
+        self.label_12.setGraphicsEffect(QtWidgets.QGraphicsDropShadowEffect(blurRadius=5, xOffset=0, yOffset=0))
 
     def retranslateUi(self, MainWindow):
         super().retranslateUi(MainWindow)
+        self.diagnose_widget.hide()
+        self.treatment_widget.hide()
+        self.recognizers.clicked.connect(self.change_recognize_widget)
+        self.diagnosers.clicked.connect(self.change_diagnose_widget)
+        self.treatments.clicked.connect(self.change_treatment_widget)
         self.rcg_start.clicked.connect(self.thread_video_start)
         self.rcg_stop.clicked.connect(self.stop_video)
         self.rcg_recognize.clicked.connect(self.start_recognize)
         self.rcg_save.clicked.connect(self.save_painimg)
+
+    def change_recognize_widget(self):
+        '''
+        点击识别按钮，切换为recognize_widget
+        :return:
+        '''
+        self.recognize_widget.show()
+        self.diagnose_widget.hide()
+        self.treatment_widget.hide()
+
+    def change_diagnose_widget(self):
+        '''
+        点击诊断按钮，切换为diagnose_widget
+        :return:
+        '''
+        self.diagnose_widget.show()
+        self.recognize_widget.hide()
+        self.treatment_widget.hide()
+
+    def change_treatment_widget(self):
+        '''
+        点击治疗按钮，切换为treatment_widget
+        :return:
+        '''
+        self.treatment_widget.show()
+        self.recognize_widget.hide()
+        self.diagnose_widget.hide()
 
     def thread_video_start(self):
         '''
@@ -222,6 +261,19 @@ class Ui(Ui_MainWindow):
             save_path = f'./pain_img/{name}_{self.most_pain_level}.png'
             # cv2.imwrite(save_path, img)
             cv2.imencode('.png', img)[1].tofile(save_path)
+
+        my_query = f"SELECT * FROM patient where name = %s"
+        self.cursor.execute(my_query, [name])
+        res = self.cursor.fetchall()
+
+        if res:
+            my_update = f"UPDATE patient SET painlevel = %s where name = %s"
+            self.cursor.execute(my_update, (self.most_pain_level, name))
+            self.conn.commit()
+        else:
+            my_insert = f"INSERT INTO patient(name,painlevel) values (%s,%s)"
+            self.cursor.execute(my_insert, (name, self.most_pain_level))
+            self.conn.commit()
 
 
 if __name__ == '__main__':

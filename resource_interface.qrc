@@ -4,9 +4,11 @@
     <file>素材库/person.ico</file>
   </qresource>
   <qresource prefix="icons">
+    <file>素材库/lamp-switch.ico</file>
+    <file>素材库/upload.ico</file>
+    <file>素材库/reset.ico</file>
+    <file>素材库/search.ico</file>
     <file>素材库/save.ico</file>
-    <file>素材库/video-conference.ico</file>
-    <file>素材库/video.ico</file>
     <file>素材库/face-recognition.ico</file>
     <file>素材库/camera.ico</file>
     <file>素材库/camera-change.ico</file>
