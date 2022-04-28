@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>留言板列表</title>
+</head>
+<body>
+    <center>
+        <h1 style="color: darkred"> Hello World </h1>
+        <table border="1" width="800">
+            <tr>
+                <th>ID编号</th>
+                <th>患者姓名</th>
+                <th>疼痛等级</th>
+                <th>性别</th>
+                <th>按摩仪</th>
+                <th>按摩时间</th>
+                <th>止痛药</th>
+                <th>备注</th>
+            </tr>
+            {% for i in data %}
+            <tr>
+                <td>{{ i.id }}</td>
+                <td>{{ i.name }}</td>
+                <td>{{ i.painlevel }}</td>
+                <td>{{ i.gender }}</td>
+                <td>{{ i.mechine }}</td>
+                <td>{{ i.mechine_time }}</td>
+                <td>{{ i.drug }}</td>
+                <td>{{ i.remark }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </center>
+</body>
+</html>

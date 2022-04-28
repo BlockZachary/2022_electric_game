@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录注册界面</title>
+    <link rel="stylesheet" href="../static/style.css">
+    <script src="../static/jquery-3.6.0.js">
+
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="welcome">
+            <div class="pinkbox">
+                <!-- 病人 -->
+                <div class="signup nodisplay">
+                    <table class="light" border="3">
+                        <h1>管理员信息</h1>
+                        <thead>
+                            <tr>
+                                <th>ID编号</th>
+                                <th>管理员姓名</th>
+                                <th>密码</th>
+                            </tr>
+                        </thead>
+
+                        {% for i in data[1] %}
+                        <tr>
+                            <td>{{ i.id }}</td>
+                            <td>{{ i.usr }}</td>
+                            <td>{{ i.password }}</td>
+                        </tr>
+                        {% endfor %}
+
+                    </table>
+                </div>
+
+                <!-- 登录 -->
+                <div class="signin">
+                    <table class="severe" border="3">
+                        <h1>患者信息</h1>
+                        <thead>
+                            <tr>
+                                <th>ID编号</th>
+                                <th>患者姓名</th>
+                                <th>疼痛等级</th>
+                                <th>性别</th>
+                                <th>按摩仪</th>
+                                <th>按摩时间</th>
+                                <th>止痛药</th>
+                                <th>备注</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for i in data[0] %}
+                        <tr>
+                            <td>{{ i.id }}</td>
+                            <td>{{ i.name }}</td>
+                            <td>{{ i.painlevel }}</td>
+                            <td>{{ i.gender }}</td>
+                            <td>{{ i.mechine }}</td>
+                            <td>{{ i.mechine_time }}</td>
+                            <td>{{ i.drug }}</td>
+                            <td>{{ i.remark }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="leftbox">
+                <h2 class="title"><span>BLOOM</span>&<br>BOUQUET</h2>
+                <p class="desc">Pick your perfect <span>bouquet</span></p>
+                <img class="flower smaller" src="../static/images/flower smaller.webp" />
+                <p class="account"></p>
+                <button class="button" id="signin">患者信息</button>
+            </div>
+
+            <div class="rightbox">
+                <h2 class="title"><span>BLOOM</span>&<br>BOUQUET</h2>
+                <p class="desc">Pick your perfect <span>bouquet</span></p>
+                <img class="flower" src="../static/images/flower.webp" />
+                <p class="account"></p>
+                <button class="button" id="signup">管理员信息</button>
+            </div>
+        </div>
+    </div>
+    <!-- partial -->
+    <!-- <script src='./jquery-3.6.0.js'></script> -->
+    <script src='../static/script.js'>
+        // $('#signup').click(function () {
+        //     $('.pinkbox').css('transform', 'tranlateX(80%)');
+        //     $('.signin').addClass('nodisplay');
+        //     $('.signup').removeClass('nodisplay');
+        // })
+
+        // $('#signup').click(function () {
+        //     $('.pinkbox').css('transform', 'tranlateX(80%)');
+        //     $('.signin').addClass('nodisplay');
+        //     $('.signup').removeClass('nodisplay');
+        // })
+    </script>
+</body>
+
+</html>

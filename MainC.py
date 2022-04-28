@@ -133,10 +133,8 @@ class Ui(Ui_MainWindow):
             return
         else:
             my_query = "INSERT INTO user(usr,password) VALUES(%s,%s)"
-            self.cursor.execute(my_query,(usr,pwd))
+            self.cursor.execute(my_query, (usr, pwd))
             self.conn.commit()
-
-
 
 
 if __name__ == '__main__':
