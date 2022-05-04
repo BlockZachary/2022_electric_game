@@ -4,7 +4,6 @@ import os
 
 import pymysql
 from PyQt5.QtCore import Qt, QPoint
-from PyQt5.QtGui import QMouseEvent, QCursor
 import sys
 
 from PyQt5.QtWidgets import QMessageBox
