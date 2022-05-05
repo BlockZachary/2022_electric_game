@@ -1,5 +1,7 @@
 # _*_coding:utf-8_*_
 # Author： Zachary
+import serial
+
 from main_interface import *
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow
@@ -28,11 +30,14 @@ class Mainwindows(QMainWindow):
         self.show()
 
         self.video_flag = 0
-        self.BN = train_BN('traindata.csv')
+        self.BN = train_BN('traindata_2.csv')
         self.most_pain_index = 0
 
         # 启动ESP8266的线程
         self.thread_esp8266_init()
+
+        task_port = threading.Thread(target=self.listen_port, name='task_port')
+        task_port.start()
 
     def setupUI(self):
         # 加阴影
@@ -155,7 +160,7 @@ class Mainwindows(QMainWindow):
         cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
         cam.set(3, 640)  # set video width
         cam.set(4, 480)  # set video height
-        framerate = 4  # set frame
+        framerate = 1  # set frame
         count_frame = 1
         self.flag = 0
 
@@ -211,6 +216,7 @@ class Mainwindows(QMainWindow):
         # 第一步，读取in_dir并执行exe，将结果输出到out_dir-->csv
         # 要处理的图片/视频路径
         path_dir = os.path.abspath('./')  # 获取当前项目文件夹绝对路径
+        print(path_dir)
         # in_dir = r"E:\New_OpenFace\Datasets\UNBC\Images\064-ak064\ak064t1afaff"  # 这个路径是你的待识别图像的路径，路径必须完整
         in_dir = fr"{path_dir}data_set"
         # csv输出路径
@@ -218,7 +224,7 @@ class Mainwindows(QMainWindow):
         execute_pic(in_dir, out_dir)
         # 第二步，获取csv中需要的AU4,6,7,9,10，并根据特征点计算EAR值，判断AU43
         # 第三步，将所获取的证据生成单独的csv文件
-        read_csv_output_result(f"{out_dir}/{os.path.basename(in_dir)}.csv")
+        read_csv_output_result(fr"{out_dir}\{os.path.basename(in_dir)}.csv")
         # 第四步，把证据csv送到Bayesian network中进行推理，并输出结果
         self.result = predict(self.BN, "test_au.csv")
         self.ui.rcg_browser.append(f'检测到疼痛图像{self.flag}帧')
@@ -363,6 +369,27 @@ class Mainwindows(QMainWindow):
                 img_Image = QPixmap(img_path)
                 self.ui.dag_videoshow.setPixmap(img_Image)
             self.conn.close()
+
+    def face_detect(self,image_path):
+        image = cv2.imread(image_path)
+        temp = cv2.cvtColor(image, cv2.COLOR_BGR2RGBA)  # COLOR_BGR2RGBA
+        gray = cv2.cvtColor(temp, cv2.COLOR_BGR2GRAY)  # 读取图像并转化为灰度
+        # Detect faces in the image
+        faces = self.faceCascade.detectMultiScale(  # 面部级联检测
+            gray,  # 灰度图像
+            scaleFactor=1.1,  # 比例因子对图像进行补偿
+            minNeighbors=5,  # 定义在当前对象前检测到多少对象
+            minSize=(30, 30),  # 给出每个窗口的最小值
+        )
+        self.textBrowser.setText("Found {0} faces!".format(len(faces)))
+        # Draw a rectangle around the faces and recognize and sign
+        for (x, y, w, h) in faces:  # 在检测到的面部周围画框
+            cv2.rectangle(image, (x, y), (x + w, y + h), (237, 149, 100), 2)
+        img2 = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # opencv读取的bgr格式图片转换成rgb格式
+        _image = QtGui.QImage(img2[:], img2.shape[1], img2.shape[0], img2.shape[1] * 3,
+                              QtGui.QImage.Format_RGB888)  # pyqt5转换成自己能放的图片格式
+        jpg_out = QPixmap(_image)
+        return jpg_out
 
     def diagnose_reset(self):
         '''
@@ -546,6 +573,28 @@ class Mainwindows(QMainWindow):
         self.s.send(senddata.encode())
         time.sleep(2)
 
+    # 语音模块控制按摩仪
+    def listen_port(self):
+        try:
+            ser = serial.Serial(port='COM11', baudrate=9600, bytesize=8, parity=serial.PARITY_NONE, stopbits=1, timeout=2)
+            while True:
+                message = ser.readline()
+                try:
+                    # print(int(message[0:1]))
+                    if int(message[0:1]) == 3:
+                        # TODO 这块添加止痛泵的控制
+                        self.ui.trm_start.click()
+                        print('已经打开了止痛泵！')
+                    elif int(message[0:1]) == 4:
+                        print('已经关闭了止痛泵！')
+                    else:
+                        continue
+                except:
+                    continue
+        except:
+            pass
+
+
 f = Flask(__name__)
 
 
@@ -589,6 +638,9 @@ def model(sql):
 # 运行flask的线程
 def frun():
     f.run(debug=False, host='127.0.0.1', port='8080')
+
+
+
 
 if __name__ == '__main__':
     t = threading.Thread(target=frun, name='t')

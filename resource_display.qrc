@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="ico">
+    <file>素材库/exit.ico</file>
+    <file>素材库/play.ico</file>
+    <file>素材库/others.ico</file>
+  </qresource>
+</RCC>
