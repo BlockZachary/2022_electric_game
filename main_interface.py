@@ -115,7 +115,7 @@ class Ui_MainWindow(object):
         self.rcg_videoshow = QtWidgets.QLabel(self.recognize_widget)
         self.rcg_videoshow.setGeometry(QtCore.QRect(40, 30, 640, 480))
         self.rcg_videoshow.setStyleSheet("background-color: rgb(234, 234, 234);\n"
-"image: url(:/images/素材库/person_2.ico);\n"
+"background-color: rgb(211, 211, 211);\n"
 "border-radius: 10px;")
         self.rcg_videoshow.setText("")
         self.rcg_videoshow.setObjectName("rcg_videoshow")
@@ -322,7 +322,7 @@ class Ui_MainWindow(object):
         self.dag_videoshow = QtWidgets.QLabel(self.diagnose_widget)
         self.dag_videoshow.setGeometry(QtCore.QRect(40, 30, 640, 480))
         self.dag_videoshow.setStyleSheet("background-color: rgb(234, 234, 234);\n"
-"image: url(:/images/素材库/person.ico);\n"
+"background-color: rgb(211, 211, 211);\n"
 "border-radius: 10px;")
         self.dag_videoshow.setText("")
         self.dag_videoshow.setObjectName("dag_videoshow")

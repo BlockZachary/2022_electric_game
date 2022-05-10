@@ -46,6 +46,8 @@ class Mainwindows(QMainWindow):
         self.ui.label_9.setGraphicsEffect(QtWidgets.QGraphicsDropShadowEffect(blurRadius=5, xOffset=0, yOffset=0))
         self.ui.label_11.setGraphicsEffect(QtWidgets.QGraphicsDropShadowEffect(blurRadius=5, xOffset=0, yOffset=0))
         self.ui.label_12.setGraphicsEffect(QtWidgets.QGraphicsDropShadowEffect(blurRadius=5, xOffset=0, yOffset=0))
+        self.ui.rcg_videoshow.setGraphicsEffect(QtWidgets.QGraphicsDropShadowEffect(blurRadius=5, xOffset=0, yOffset=0))
+        self.ui.dag_videoshow.setGraphicsEffect(QtWidgets.QGraphicsDropShadowEffect(blurRadius=5, xOffset=0, yOffset=0))
 
     # 这三个方法是鼠标移动事件
     def mousePressEvent(self, event):
@@ -169,7 +171,7 @@ class Mainwindows(QMainWindow):
                 self.ui.rcg_browser.append(f'{time.strftime("%Y-%m-%d %X", time.localtime())} 摄像头已开启录制，点击停止拍摄图像结束录制！')
                 while True:
                     ret, img = cam.read()
-                    img = cv2.flip(img, 1)  # TODO 水平翻转 使用摄像头的时候注释掉
+                    # img = cv2.flip(img, 1)  # TODO 水平翻转 使用摄像头的时候注释掉
                     # cv2.imshow("pic", img)
                     height, width, bytesPerComponent = img.shape
                     bytesPerLine = bytesPerComponent * width
@@ -573,7 +575,7 @@ class Mainwindows(QMainWindow):
         self.s.send(senddata.encode())
         time.sleep(2)
 
-    # 语音模块控制按摩仪
+    # 语音模块控制摄像头
     def listen_port(self):
         try:
             ser = serial.Serial(port='COM11', baudrate=9600, bytesize=8, parity=serial.PARITY_NONE, stopbits=1, timeout=2)
@@ -581,12 +583,27 @@ class Mainwindows(QMainWindow):
                 message = ser.readline()
                 try:
                     # print(int(message[0:1]))
-                    if int(message[0:1]) == 3:
-                        # TODO 这块添加止痛泵的控制
-                        self.ui.trm_start.click()
-                        print('已经打开了止痛泵！')
+                    if int(message[0:1]) == 2:
+                        self.ui.recognizers.click()
+                        print('已经打开识别界面！')
+                    elif int(message[0:1]) == 3:
+                        self.ui.diagnosers.click()
+                        print('已经打开诊断界面！')
                     elif int(message[0:1]) == 4:
-                        print('已经关闭了止痛泵！')
+                        self.ui.treatments.click()
+                        print('已经打开治疗界面')
+                    elif int(message[0:1]) == 5:
+                        self.ui.rcg_start.click()
+                        print('已经打开摄像头')
+                    elif int(message[0:1]) == 6:
+                        self.ui.rcg_stop.click()
+                        print('已经关闭摄像头')
+                    elif int(message[0:1]) == 7:
+                        self.ui.rcg_recognize.click()
+                        print('已经开始识别')
+                    elif int(message[0:1]) == 8:
+                        self.ui.trm_start.click()
+                        print('已经启动设备')
                     else:
                         continue
                 except:

@@ -186,7 +186,7 @@ QPushButton:pressed{
      <string> 文 件  </string>
     </property>
     <property name="icon">
-     <iconset resource="resource_display.qrc">
+     <iconset>
       <normaloff>:/ico/素材库/others.ico</normaloff>:/ico/素材库/others.ico</iconset>
     </property>
    </widget>
@@ -223,7 +223,7 @@ QPushButton:pressed{
      <string>播放序列</string>
     </property>
     <property name="icon">
-     <iconset resource="resource_display.qrc">
+     <iconset>
       <normaloff>:/ico/素材库/play.ico</normaloff>:/ico/素材库/play.ico</iconset>
     </property>
    </widget>
@@ -254,7 +254,7 @@ QPushButton:pressed{
      <string/>
     </property>
     <property name="icon">
-     <iconset resource="resource_display.qrc">
+     <iconset>
       <normaloff>:/ico/素材库/exit.ico</normaloff>:/ico/素材库/exit.ico</iconset>
     </property>
     <property name="iconSize">

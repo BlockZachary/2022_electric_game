@@ -209,7 +209,7 @@ QPushButton:focus{
      </property>
      <property name="styleSheet">
       <string notr="true">background-color: rgb(234, 234, 234);
-image: url(:/images/素材库/person_2.ico);
+background-color: rgb(211, 211, 211);
 border-radius: 10px;</string>
      </property>
      <property name="text">
@@ -647,7 +647,7 @@ QPushButton:pressed{
      </property>
      <property name="styleSheet">
       <string notr="true">background-color: rgb(234, 234, 234);
-image: url(:/images/素材库/person.ico);
+background-color: rgb(211, 211, 211);
 border-radius: 10px;</string>
      </property>
      <property name="text">
