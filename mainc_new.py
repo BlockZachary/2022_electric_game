@@ -2,6 +2,7 @@
 # Author： Zachary
 
 import os
+import subprocess
 import sys
 from login import *
 from PyQt5.QtWidgets import QMessageBox, QApplication, QMainWindow
@@ -96,7 +97,9 @@ class Login(QMainWindow):
             self.conn.close()
             if res:
                 self.ui.close_btn.click()
-                os.system("python mainb_new_interface.py")
+                # os.system(r"python E:\※学习资料※\postgraduate\22研电赛\220301pycharmproject_ui\mainb_new_interface.py")
+                res = subprocess.run(r"python E:\※学习资料※\postgraduate\22研电赛\220301pycharmproject_ui\mainb_new_interface.py", shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE)
                 sys.exit(self.exec_())
 
             else:

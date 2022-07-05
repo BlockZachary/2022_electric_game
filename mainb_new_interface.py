@@ -6,7 +6,7 @@ from main_interface import *
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow
 import pymysql
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtWidgets import QTableWidgetItem, QMessageBox
 from flask import Flask, render_template
@@ -30,7 +30,7 @@ class Mainwindows(QMainWindow):
         self.show()
 
         self.video_flag = 0
-        self.BN = train_BN('traindata_2.csv')
+        self.BN = train_BN('./traindata_2.csv')
         self.most_pain_index = 0
 
         # 启动ESP8266的线程
@@ -38,6 +38,11 @@ class Mainwindows(QMainWindow):
 
         task_port = threading.Thread(target=self.listen_port, name='task_port')
         task_port.start()
+
+        # 按摩仪的初始状态
+        self.machine_mode = 'off'
+        self.machine_mode_index = 0
+
 
     def setupUI(self):
         # 加阴影
@@ -73,7 +78,7 @@ class Mainwindows(QMainWindow):
         self.ui.diagnosers.clicked.connect(self.change_diagnose_widget)
         self.ui.treatments.clicked.connect(self.change_treatment_widget)
 
-        self.ui.rcg_start.clicked.connect(self.thread_video_start)
+        self.ui.rcg_start.clicked.connect(self.video_start)
         self.ui.rcg_stop.clicked.connect(self.stop_video)
         self.ui.rcg_recognize.clicked.connect(self.start_recognize)
         self.ui.rcg_save.clicked.connect(self.save_painimg)
@@ -84,7 +89,7 @@ class Mainwindows(QMainWindow):
 
         self.ui.trm_search.clicked.connect(self.treatment_search)
         self.ui.trm_reset.clicked.connect(self.treatment_reset)
-        self.ui.trm_start.clicked.connect(self.button_medicare_ctrl)  # TODO 这个是trm的控制按钮 到时候往后面挪
+        self.ui.trm_start.clicked.connect(self.button_medicare_ctrl)
 
     # 三个widget之间切换
     def change_recognize_widget(self):
@@ -123,13 +128,13 @@ class Mainwindows(QMainWindow):
         self.cursor = self.conn.cursor()
 
     # recognizers widget的功能实现
-    def thread_video_start(self):
-        '''
-        线程1：recognizers连接open_video
-        :return:
-        '''
-        thd1 = threading.Thread(target=self.video_start, name='thd1')
-        thd1.start()
+    # def thread_video_start(self):
+    #     '''
+    #     线程1：recognizers连接open_video
+    #     :return:
+    #     '''
+    #     thd1 = threading.Thread(target=self.video_start, name='thd1')
+    #     thd1.start()
 
     def thread_show_mostimg(self):
         '''
@@ -147,6 +152,21 @@ class Mainwindows(QMainWindow):
         thd3 = threading.Thread(target=self.esp8266_init, name='thd3')
         thd3.start()
 
+    def show_image(self):
+        ret, self.image = self.cam.read()
+        img = cv2.flip(self.image, 1)  # TODO 水平翻转 使用摄像头的时候注释掉
+        # cv2.imshow("pic", img)
+        height, width, bytesPerComponent = self.image.shape
+        bytesPerLine = bytesPerComponent * width
+
+        _img = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
+        _img = QImage(_img.data, width, height, bytesPerLine, QImage.Format_RGB888)
+        self.ui.rcg_videoshow.setPixmap(QPixmap.fromImage(_img))
+        self.ui.rcg_videoshow.setScaledContents(True)
+        cv2.imwrite(f'./data_set/{self.flag}_pic.png', self.image)
+        self.flag += 1
+
+
     def video_start(self):
         """
         recognizers创建文件夹并打开摄像头
@@ -157,48 +177,61 @@ class Mainwindows(QMainWindow):
         except:
             shutil.rmtree('./data_set')
             os.mkdir('./data_set')
-        self.video_flag = 1
+        # self.video_flag = 1
 
-        cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-        cam.set(3, 640)  # set video width
-        cam.set(4, 480)  # set video height
+        self.camera_timer = QTimer()
+        self.camera_timer.timeout.connect(self.show_image)
+
+        self.cam = cv2.VideoCapture(0,cv2.CAP_DSHOW)
+        self.cam.set(cv2.CAP_PROP_BUFFERSIZE,1)
+        self.cam.set(cv2.CAP_PROP_FRAME_WIDTH, 800)  # set video width
+        self.cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)  # set video height
         framerate = 1  # set frame
         count_frame = 1
         self.flag = 0
+        self.camera_timer.start(4)
+        self.show_image()
 
-        while True:
-            if self.video_flag == 1:
-                self.ui.rcg_browser.append(f'{time.strftime("%Y-%m-%d %X", time.localtime())} 摄像头已开启录制，点击停止拍摄图像结束录制！')
-                while True:
-                    ret, img = cam.read()
-                    # img = cv2.flip(img, 1)  # TODO 水平翻转 使用摄像头的时候注释掉
-                    # cv2.imshow("pic", img)
-                    height, width, bytesPerComponent = img.shape
-                    bytesPerLine = bytesPerComponent * width
 
-                    _img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-                    _img = QImage(_img.data, width, height, bytesPerLine, QImage.Format_RGB888)
-                    self.ui.rcg_videoshow.setPixmap(QPixmap.fromImage(_img))
-                    if count_frame % framerate == 0:
-                        cv2.imwrite(f'./data_set/{self.flag}_pic.png', img)
-                        self.flag += 1
-                    # time.sleep(0.05)
-                    count_frame += 1
-                    # key = cv2.waitKey(10)  # 原来是10
-                    if self.video_flag == 0:
-                        break
-            else:
-                break
+
+        # while True:
+        #     if self.video_flag == 1:
+        #         self.ui.rcg_browser.append(f'{time.strftime("%Y-%m-%d %X", time.localtime())} 摄像头已开启录制，点击停止拍摄图像结束录制！')
+        #         while True:
+        #             ret, img = cam.read()
+        #             # img = cv2.flip(img, 1)  # TODO 水平翻转 使用摄像头的时候注释掉
+        #             # cv2.imshow("pic", img)
+        #             height, width, bytesPerComponent = img.shape
+        #             bytesPerLine = bytesPerComponent * width
+        #
+        #             _img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        #             _img = QImage(_img.data, width, height, bytesPerLine, QImage.Format_RGB888)
+        #             self.ui.rcg_videoshow.setPixmap(QPixmap.fromImage(_img))
+        #             self.ui.rcg_videoshow.setScaledContents(True)
+        #             if count_frame % framerate == 0:
+        #                 cv2.imwrite(f'./data_set/{self.flag}_pic.png', img)
+        #                 self.flag += 1
+        #             # time.sleep(0.05)
+        #             count_frame += 1
+        #             # key = cv2.waitKey(10)  # 原来是10
+        #             if self.video_flag == 0:
+        #                 break
+        #     else:
+        #         break
 
     def stop_video(self):
         '''
         recognizers暂停摄像头的拍摄
         :return:
         '''
-        self.video_flag = 0
-        time.sleep(0.1)
+        self.camera_timer.stop()
+        self.cam.release()
         self.ui.rcg_videoshow.clear()
+        # self.video_flag = 0
+        # time.sleep(0.1)
+        # self.ui.rcg_videoshow.clear()
         self.ui.rcg_browser.setText(f'{time.strftime("%Y-%m-%d %X", time.localtime())} 拍摄图像结束！请点击疼痛表情识别！')
+
 
     def show_mostimg(self):
         '''
@@ -208,6 +241,14 @@ class Mainwindows(QMainWindow):
         img_path = f'./data_set/{self.most_pain_index}_pic.png'
         img_Image = QPixmap(img_path)
         self.ui.rcg_videoshow.setPixmap(img_Image)
+
+    def send_alarmmsg(self, data):
+        if data == 'Severe' or data == 'Moderate':
+            self.ctrl_treatment("alarm_on")
+            time.sleep(5)
+            self.ctrl_treatment("alarm_off")
+        else:
+            pass
 
     def start_recognize(self):
         '''
@@ -230,14 +271,15 @@ class Mainwindows(QMainWindow):
         # 第四步，把证据csv送到Bayesian network中进行推理，并输出结果
         self.result = predict(self.BN, "test_au.csv")
         self.ui.rcg_browser.append(f'检测到疼痛图像{self.flag}帧')
+        self.set_tablewidget(self.result)
 
         self.most_pain_index = self.result[1]
-        # self.textBrowser.append(f'[result]疼痛程度最剧烈的是第{result[1] + 1}帧，等级为{result[2]}')
-
         self.most_pain_level = self.result[2]
+        # self.textBrowser.append(f'[result]疼痛程度最剧烈的是第{self.result[1] + 1}帧，等级为{self.result[2]}')
 
+        # TODO 当没有使用到8266的时候 注释掉这个发送报警信号
+        # self.send_alarmmsg(self.most_pain_level)
         self.thread_show_mostimg()
-        self.set_tablewidget(self.result)
 
     def set_tablewidget(self, res):
         '''
@@ -331,13 +373,14 @@ class Mainwindows(QMainWindow):
         :return:
         '''
         try:
-            address = "192.168.1.112"  # 8266的服务器的ip地址
+            address = "192.168.1.104"  # 8266的服务器的ip地址
             port = 8266  # 8266的服务器的端口号
             self.buffsize = 1024  # 接收数据的缓存大小
             self.s = socket(AF_INET, SOCK_STREAM)
-            self.conn = ("192.168.1.113", 1234)
+            self.conn = ("192.168.1.107", 1234)
             self.s.connect((address, port))
-            self.button_treatment_flag = "0"
+            self.button_treatment_flag = None
+            print('已经成功连接设备')
         except:
             print('未能成功连接设备，请重试...')
 
@@ -370,9 +413,10 @@ class Mainwindows(QMainWindow):
                 img_path = f'./pain_img/{patient_name}_{self.ui.dag_painlevel.text()}.png'
                 img_Image = QPixmap(img_path)
                 self.ui.dag_videoshow.setPixmap(img_Image)
+                self.ui.dag_videoshow.setScaledContents(True)
             self.conn.close()
 
-    def face_detect(self,image_path):
+    def face_detect(self, image_path):
         image = cv2.imread(image_path)
         temp = cv2.cvtColor(image, cv2.COLOR_BGR2RGBA)  # COLOR_BGR2RGBA
         gray = cv2.cvtColor(temp, cv2.COLOR_BGR2GRAY)  # 读取图像并转化为灰度
@@ -544,41 +588,116 @@ class Mainwindows(QMainWindow):
         :return:
         """
         workmode = self.ui.trm_mechine_workmode.currentIndex()
+        durgmode = self.ui.trm_durg_use.currentIndex()
         try:
-            if workmode == 1:
-                self.button_treatment_flag = "1"
-                self.ctrl_treatment()
-                self.ui.trm_browser.setText('[success]治疗仪启动成功！')
+            if workmode == 0:
+                print("0")
+                if self.machine_mode == 'off':
+                    self.ui.trm_browser.setText('[success]治疗仪已经处于关闭状态！')
+                elif self.machine_mode == 'on':
+                    self.machine_mode = 'off'
+                    self.machine_mode_index = 0
+                    self.button_treatment_flag = "machine_off"
+                    self.ctrl_treatment(self.button_treatment_flag)
+                    self.ui.trm_browser.setText('[success]治疗仪关闭成功！')
+            elif workmode == 1:
+                print("1")
+                if self.machine_mode == 'off':
+                    self.machine_mode = 'on'
+                    self.machine_mode_index = 1
+                    self.button_treatment_flag = "mode1"
+                    self.ctrl_treatment(self.button_treatment_flag)
+                    self.ui.trm_browser.setText('[success]治疗仪处于轻柔缓解模式！')
+                elif self.machine_mode_index == 2:
+                    self.machine_mode_index = 1
+                    self.button_treatment_flag = "mode21"
+                    self.ctrl_treatment(self.button_treatment_flag)
+                    self.ui.trm_browser.setText('[success]治疗仪已切换至轻柔缓解模式！')
+                elif self.machine_mode_index == 3:
+                    self.machine_mode_index = 1
+                    self.button_treatment_flag = "mode31"
+                    self.ctrl_treatment(self.button_treatment_flag)
+                    self.ui.trm_browser.setText('[success]治疗仪已切换至轻柔缓解模式！')
+                else:
+                    self.ui.trm_browser.setText('[success]治疗仪已经处于轻柔缓解模式！')
             elif workmode == 2:
-                self.button_treatment_flag = "2"
-                self.ctrl_treatment()
-                self.ui.trm_browser.setText('[success]治疗仪启动成功！')
+                print("2")
+                if self.machine_mode == 'off':
+                    self.machine_mode = 'on'
+                    self.machine_mode_index = 2
+                    self.button_treatment_flag = "mode2"
+                    self.ctrl_treatment(self.button_treatment_flag)
+                    self.ui.trm_browser.setText('[success]治疗仪处于持续缓解模式！')
+                elif self.machine_mode_index == 1:
+                    self.machine_mode_index = 2
+                    self.button_treatment_flag = "mode12"
+                    self.ctrl_treatment(self.button_treatment_flag)
+                    self.ui.trm_browser.setText('[success]治疗仪已切换至持续缓解模式！')
+                elif self.machine_mode_index == 3:
+                    self.machine_mode_index = 2
+                    self.button_treatment_flag = "mode32"
+                    self.ctrl_treatment(self.button_treatment_flag)
+                    self.ui.trm_browser.setText('[success]治疗仪已切换至持续缓解模式！')
+                else:
+                    self.ui.trm_browser.setText('[success]治疗仪已经处于持续缓解模式！')
             elif workmode == 3:
-                self.button_treatment_flag = '3'
-                self.ctrl_treatment()
-                self.ui.trm_browser.setText('[success]治疗仪启动成功！')
-            elif workmode == 0:
-                self.button_treatment_flag = '4'
-                self.ctrl_treatment()
-                self.ui.trm_browser.setText('[success]治疗仪启动成功！')
+                print("3")
+                if self.machine_mode == 'off':
+                    self.machine_mode = 'on'
+                    self.machine_mode_index = 3
+                    self.button_treatment_flag = "mode3"
+                    self.ctrl_treatment(self.button_treatment_flag)
+                    self.ui.trm_browser.setText('[success]治疗仪处于强力缓解模式！')
+                elif self.machine_mode_index == 1:
+                    self.machine_mode_index = 3
+                    self.button_treatment_flag = "mode13"
+                    self.ctrl_treatment(self.button_treatment_flag)
+                    self.ui.trm_browser.setText('[success]治疗仪已切换至强力缓解模式！')
+                elif self.machine_mode_index == 2:
+                    self.machine_mode_index = 3
+                    self.button_treatment_flag = "mode23"
+                    self.ctrl_treatment(self.button_treatment_flag)
+                    self.ui.trm_browser.setText('[success]治疗仪已切换至强力缓解模式！')
+                else:
+                    self.ui.trm_browser.setText('[success]治疗仪已经处于强力缓解模式！')
+
+            # 添加止痛泵的电机
+            if durgmode == 0:
+                pass
+            elif durgmode ==1:
+                self.button_treatment_flag = "drug"
+                self.ctrl_treatment(self.button_treatment_flag)
+                self.ui.trm_browser.append('[success]止痛泵已经启动！')
+            elif durgmode == 2:
+                self.button_treatment_flag = "drug"
+                self.ctrl_treatment(self.button_treatment_flag)
+                self.ui.trm_browser.append('[success]止痛泵已经启动！')
+            elif durgmode == 3:
+                self.button_treatment_flag = "drug"
+                self.ctrl_treatment(self.button_treatment_flag)
+                self.ui.trm_browser.append('[success]止痛泵已经启动！')
+            elif durgmode == 4:
+                self.button_treatment_flag = "drug"
+                self.ctrl_treatment(self.button_treatment_flag)
+                self.ui.trm_browser.append('[success]止痛泵已经启动！')
         except:
             self.ui.trm_browser.setText('[warning]未连接治疗仪，无法启动治疗...')
 
-
     # TODO 控制端的两个测试例子，这两个到时候往后挪动
-    def ctrl_treatment(self):
+    def ctrl_treatment(self, data):
         """
         发送控制信息
         :return:
         """
-        senddata = self.button_treatment_flag
+        senddata = data
         self.s.send(senddata.encode())
         time.sleep(2)
 
     # 语音模块控制摄像头
     def listen_port(self):
         try:
-            ser = serial.Serial(port='COM11', baudrate=9600, bytesize=8, parity=serial.PARITY_NONE, stopbits=1, timeout=2)
+            ser = serial.Serial(port='COM11', baudrate=9600, bytesize=8, parity=serial.PARITY_NONE, stopbits=1,
+                                timeout=2)
             while True:
                 message = ser.readline()
                 try:
@@ -604,6 +723,27 @@ class Mainwindows(QMainWindow):
                     elif int(message[0:1]) == 8:
                         self.ui.trm_start.click()
                         print('已经启动设备')
+                    elif int(message[0:1]) == 9:
+                        self.ui.trm_durg_use.setCurrentIndex(0)
+                        self.ui.trm_drug_speed.clear()
+                        self.ui.trm_drug_mass.clear()
+                        self.ui.trm_mechine_workmode.setCurrentIndex(1)
+                        self.ui.trm_mechine_worktime.setText("10")
+                        print('方案一')
+                    elif int(message[0:2]) == 10:
+                        self.ui.trm_durg_use.setCurrentIndex(1)
+                        self.ui.trm_drug_speed.setText("0.01")
+                        self.ui.trm_drug_mass.setText("5")
+                        self.ui.trm_mechine_workmode.setCurrentIndex(2)
+                        self.ui.trm_mechine_worktime.setText("20")
+                        print('方案二')
+                    elif int(message[0:2]) == 11:
+                        self.ui.trm_durg_use.setCurrentIndex(3)
+                        self.ui.trm_drug_speed.setText("0.01")
+                        self.ui.trm_drug_mass.setText("8")
+                        self.ui.trm_mechine_workmode.setCurrentIndex(3)
+                        self.ui.trm_mechine_worktime.setText("30")
+                        print('方案三')
                     else:
                         continue
                 except:
@@ -655,8 +795,6 @@ def model(sql):
 # 运行flask的线程
 def frun():
     f.run(debug=False, host='127.0.0.1', port='8080')
-
-
 
 
 if __name__ == '__main__':

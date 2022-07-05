@@ -7,12 +7,12 @@ import threading
 
 
 # address="172.20.10.3"   #8266的服务器的ip地址
-address="192.168.1.146"   #8266的服务器的ip地址
+address="192.168.1.160"   #8266的服务器的ip地址
 
 port=8266           #8266的服务器的端口号
 buffsize=1024        #接收数据的缓存大小
 s=socket(AF_INET, SOCK_STREAM)
-conn = ("192.168.1.124",1234)
+conn = ("192.168.1.131",1234)
 s.connect((address,port))
 
 

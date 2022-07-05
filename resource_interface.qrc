@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="images">
+    <file>素材库/学院标志.png</file>
+    <file>素材库/12.png</file>
     <file>素材库/person_2.ico</file>
     <file>素材库/person.ico</file>
   </qresource>
