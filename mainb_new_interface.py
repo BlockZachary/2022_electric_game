@@ -43,7 +43,6 @@ class Mainwindows(QMainWindow):
         self.machine_mode = 'off'
         self.machine_mode_index = 0
 
-
     def setupUI(self):
         # 加阴影
         self.ui.label.setGraphicsEffect(QtWidgets.QGraphicsDropShadowEffect(blurRadius=25, xOffset=0, yOffset=0))
@@ -154,18 +153,50 @@ class Mainwindows(QMainWindow):
 
     def show_image(self):
         ret, self.image = self.cam.read()
-        img = cv2.flip(self.image, 1)  # TODO 水平翻转 使用摄像头的时候注释掉
+        self.image = cv2.flip(self.image, 1)  # TODO 水平翻转 使用外接摄像头的时候注释掉
         # cv2.imshow("pic", img)
         height, width, bytesPerComponent = self.image.shape
         bytesPerLine = bytesPerComponent * width
 
+        gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
+        # Detect faces in the image
+        faces = self.faceCascade.detectMultiScale(
+            gray,
+            scaleFactor=1.1,
+            minNeighbors=5,
+            minSize=(30, 30)
+            # flags = cv2.CV_HAAR_SCALE_IMAGE
+        )
+
         _img = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
+        for (x, y, w, h) in faces:  # 在检测到的面部周围画框
+            cv2.rectangle(_img, (x, y), (x + w, y + h), (149, 237, 100), 2)
         _img = QImage(_img.data, width, height, bytesPerLine, QImage.Format_RGB888)
         self.ui.rcg_videoshow.setPixmap(QPixmap.fromImage(_img))
         self.ui.rcg_videoshow.setScaledContents(True)
-        cv2.imwrite(f'./data_set/{self.flag}_pic.png', self.image)
-        self.flag += 1
 
+        if self.flag < 125:
+            cv2.imwrite(f'./data_set/{self.flag}_pic.png', self.image)
+            self.ui.rcg_browser.setText(f'{time.strftime("%Y-%m-%d %X", time.localtime())} 开始检测！')
+            self.flag += 1
+            print(self.flag)
+        elif self.flag == 125:
+            self.start = time.time()
+            self.start_recognize()
+            self.end = time.time()
+            self.flag += 1
+            print(self.flag)
+        elif self.flag < (750 - (self.end - self.start) * 25):
+            self.flag += 1
+            print(self.flag)
+        else:
+            self.flag = 0
+            print(self.flag)
+            try:
+                os.mkdir('./data_set')
+            except:
+                shutil.rmtree('./data_set')
+                os.mkdir('./data_set')
 
     def video_start(self):
         """
@@ -182,17 +213,24 @@ class Mainwindows(QMainWindow):
         self.camera_timer = QTimer()
         self.camera_timer.timeout.connect(self.show_image)
 
-        self.cam = cv2.VideoCapture(0,cv2.CAP_DSHOW)
-        self.cam.set(cv2.CAP_PROP_BUFFERSIZE,1)
+        self.cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+        self.cam.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         self.cam.set(cv2.CAP_PROP_FRAME_WIDTH, 800)  # set video width
         self.cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)  # set video height
         framerate = 1  # set frame
         count_frame = 1
         self.flag = 0
-        self.camera_timer.start(4)
-        self.show_image()
+        self.camera_timer.start(40)
 
+        cascPath = "haarcascade_frontalface_alt.xml"  # 加载haar分类器的xml文件
 
+        # Create the haar cascade
+        self.faceCascade = cv2.CascadeClassifier(cascPath)  # 创建haar级联并使用面部级联对其进行初始化，
+
+        # 这会将面部级联加载到内存中，以便使用，
+        # 级联只是一个XML文件，其中包含用于检测人脸的数据
+
+        # self.show_image()
 
         # while True:
         #     if self.video_flag == 1:
@@ -230,8 +268,9 @@ class Mainwindows(QMainWindow):
         # self.video_flag = 0
         # time.sleep(0.1)
         # self.ui.rcg_videoshow.clear()
-        self.ui.rcg_browser.setText(f'{time.strftime("%Y-%m-%d %X", time.localtime())} 拍摄图像结束！请点击疼痛表情识别！')
-
+        # self.ui.rcg_browser.setText(f'{time.strftime("%Y-%m-%d %X", time.localtime())} 拍摄图像结束！请点击疼痛表情识别！')
+        self.ui.rcg_browser.setText(f'{time.strftime("%Y-%m-%d %X", time.localtime())} 拍摄图像结束！')
+        self.thread_show_mostimg()
 
     def show_mostimg(self):
         '''
@@ -279,7 +318,7 @@ class Mainwindows(QMainWindow):
 
         # TODO 当没有使用到8266的时候 注释掉这个发送报警信号
         # self.send_alarmmsg(self.most_pain_level)
-        self.thread_show_mostimg()
+        # self.thread_show_mostimg()
 
     def set_tablewidget(self, res):
         '''
@@ -664,7 +703,7 @@ class Mainwindows(QMainWindow):
             # 添加止痛泵的电机
             if durgmode == 0:
                 pass
-            elif durgmode ==1:
+            elif durgmode == 1:
                 self.button_treatment_flag = "drug"
                 self.ctrl_treatment(self.button_treatment_flag)
                 self.ui.trm_browser.append('[success]止痛泵已经启动！')
