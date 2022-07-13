@@ -1,5 +1,7 @@
 # _*_coding:utf-8_*_
 # Author： Zachary
+import datetime
+
 import serial
 
 from main_interface import *
@@ -176,7 +178,8 @@ class Mainwindows(QMainWindow):
         self.ui.rcg_videoshow.setScaledContents(True)
 
         if self.flag < 125:
-            cv2.imwrite(f'./data_set/{self.flag}_pic.png', self.image)
+            # cv2.imwrite(f'./data_set/{self.flag}_pic.png', self.image)
+            cv2.imwrite(f'./data_set/{datetime.datetime.now().strftime("%Y%m%d%H%M%S")}_{self.flag}_pic.png', self.image)
             self.ui.rcg_browser.setText(f'{time.strftime("%Y-%m-%d %X", time.localtime())} 开始检测！')
             self.flag += 1
             print(self.flag)
@@ -192,6 +195,15 @@ class Mainwindows(QMainWindow):
         else:
             self.flag = 0
             print(self.flag)
+
+            try:
+                time_now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                os.makedirs(f'./data_save/{time_now}',exist_ok=True)
+            except:
+                pass
+
+            shutil.move("./data_set/",f"./data_save/{time_now}")
+
             try:
                 os.mkdir('./data_set')
             except:
@@ -277,7 +289,13 @@ class Mainwindows(QMainWindow):
         recognizers显示最剧烈一帧图像
         :return:
         '''
-        img_path = f'./data_set/{self.most_pain_index}_pic.png'
+        files_path = f'./data_set/'
+        files = os.listdir(files_path)
+        for file in files:
+            if file.endswith(f'_{self.most_pain_index}_pic.png'):
+                print(file)
+                break
+        img_path = f'./data_set/{file}'
         img_Image = QPixmap(img_path)
         self.ui.rcg_videoshow.setPixmap(img_Image)
 
