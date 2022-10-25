@@ -167,7 +167,8 @@ class Login(QMainWindow):
         创建mysql连接的函数
         :return:
         '''
-        self.conn = pymysql.connect(user='root', password='980226', database='pain', use_unicode=True)
+        # 101.37.160.114
+        self.conn = pymysql.connect(host = '101.37.160.114', user='zachary', password='980226', database='pain', use_unicode=True)
         self.cursor = self.conn.cursor()
 
 

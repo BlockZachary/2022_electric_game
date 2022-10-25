@@ -1,9 +1,7 @@
 # _*_coding:utf-8_*_
 # Author： Zachary
 import datetime
-
 import serial
-
 from main_interface import *
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow
@@ -47,6 +45,7 @@ class Mainwindows(QMainWindow):
 
     def setupUI(self):
         # 加阴影
+
         self.ui.label.setGraphicsEffect(QtWidgets.QGraphicsDropShadowEffect(blurRadius=25, xOffset=0, yOffset=0))
         self.ui.label_2.setGraphicsEffect(QtWidgets.QGraphicsDropShadowEffect(blurRadius=25, xOffset=0, yOffset=0))
         self.ui.label_9.setGraphicsEffect(QtWidgets.QGraphicsDropShadowEffect(blurRadius=5, xOffset=0, yOffset=0))
@@ -125,17 +124,11 @@ class Mainwindows(QMainWindow):
         创建mysql连接的函数
         :return:
         '''
-        self.conn = pymysql.connect(user='root', password='980226', database='pain', use_unicode=True)
+        # TODO : 修改数据库的连接
+        # 101.37.160.114
+        self.conn = pymysql.connect(host='101.37.160.114', user='zachary', password='980226', database='pain',
+                                    use_unicode=True)
         self.cursor = self.conn.cursor()
-
-    # recognizers widget的功能实现
-    # def thread_video_start(self):
-    #     '''
-    #     线程1：recognizers连接open_video
-    #     :return:
-    #     '''
-    #     thd1 = threading.Thread(target=self.video_start, name='thd1')
-    #     thd1.start()
 
     def thread_show_mostimg(self):
         '''
@@ -153,10 +146,24 @@ class Mainwindows(QMainWindow):
         thd3 = threading.Thread(target=self.esp8266_init, name='thd3')
         thd3.start()
 
+    def thread_send_alarmmsg(self):
+        '''
+        线程4：用于连接声光报警
+        :return:
+        '''
+        thd4 = threading.Thread(target=self.send_alarmmsg, name='thd4')
+        thd4.start()
+
     def show_image(self):
+        # 这里实现的是每隔img_cycle的时长执行img_time的捕获时长，即默认每30秒捕获一次图像，每次捕获持续5秒
+        img_time = 5  # TODO 修改捕获图像的时长，单位：秒
+        img_ret = 25 # 图像的捕获帧率，由video_start()中的self.camera_timer.start(40)的参数40决定的。
+        img_cycle = 30 # TODO 修改捕获图像的周期，单位：秒
+        img_num = img_time*img_ret
+        img_inter = img_cycle*img_ret
         ret, self.image = self.cam.read()
-        self.image = cv2.flip(self.image, 1)  # TODO 水平翻转 使用外接摄像头的时候注释掉
-        # cv2.imshow("pic", img)
+        # TODO 水平翻转 使用外接摄像头的时候注释掉下面这一行
+        self.image = cv2.flip(self.image, 1)
         height, width, bytesPerComponent = self.image.shape
         bytesPerLine = bytesPerComponent * width
 
@@ -177,19 +184,19 @@ class Mainwindows(QMainWindow):
         self.ui.rcg_videoshow.setPixmap(QPixmap.fromImage(_img))
         self.ui.rcg_videoshow.setScaledContents(True)
 
-        if self.flag < 125:
-            # cv2.imwrite(f'./data_set/{self.flag}_pic.png', self.image)
-            cv2.imwrite(f'./data_set/{datetime.datetime.now().strftime("%Y%m%d%H%M%S")}_{self.flag}_pic.png', self.image)
+        if self.flag < img_num:
+            cv2.imwrite(f'./data_set/{datetime.datetime.now().strftime("%Y%m%d%H%M%S")}_{self.flag}_pic.png',
+                        self.image)
             self.ui.rcg_browser.setText(f'{time.strftime("%Y-%m-%d %X", time.localtime())} 开始检测！')
             self.flag += 1
             print(self.flag)
-        elif self.flag == 125:
+        elif self.flag == img_num:
             self.start = time.time()
             self.start_recognize()
             self.end = time.time()
             self.flag += 1
             print(self.flag)
-        elif self.flag < (750 - (self.end - self.start) * 25):
+        elif self.flag < (img_inter - (self.end - self.start) * img_ret):
             self.flag += 1
             print(self.flag)
         else:
@@ -198,11 +205,11 @@ class Mainwindows(QMainWindow):
 
             try:
                 time_now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-                os.makedirs(f'./data_save/{time_now}',exist_ok=True)
+                os.makedirs(f'./data_save/{time_now}', exist_ok=True)
             except:
                 pass
 
-            shutil.move("./data_set/",f"./data_save/{time_now}")
+            shutil.move("./data_set/", f"./data_save/{time_now}")
 
             try:
                 os.mkdir('./data_set')
@@ -234,40 +241,10 @@ class Mainwindows(QMainWindow):
         self.flag = 0
         self.camera_timer.start(40)
 
-        cascPath = "haarcascade_frontalface_alt.xml"  # 加载haar分类器的xml文件
+        cascPath = "haarcascade_frontalface_alt.xml"  # 加载haar分类器的xml文件，这个文件的作用是框选出人脸区域
 
         # Create the haar cascade
         self.faceCascade = cv2.CascadeClassifier(cascPath)  # 创建haar级联并使用面部级联对其进行初始化，
-
-        # 这会将面部级联加载到内存中，以便使用，
-        # 级联只是一个XML文件，其中包含用于检测人脸的数据
-
-        # self.show_image()
-
-        # while True:
-        #     if self.video_flag == 1:
-        #         self.ui.rcg_browser.append(f'{time.strftime("%Y-%m-%d %X", time.localtime())} 摄像头已开启录制，点击停止拍摄图像结束录制！')
-        #         while True:
-        #             ret, img = cam.read()
-        #             # img = cv2.flip(img, 1)  # TODO 水平翻转 使用摄像头的时候注释掉
-        #             # cv2.imshow("pic", img)
-        #             height, width, bytesPerComponent = img.shape
-        #             bytesPerLine = bytesPerComponent * width
-        #
-        #             _img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        #             _img = QImage(_img.data, width, height, bytesPerLine, QImage.Format_RGB888)
-        #             self.ui.rcg_videoshow.setPixmap(QPixmap.fromImage(_img))
-        #             self.ui.rcg_videoshow.setScaledContents(True)
-        #             if count_frame % framerate == 0:
-        #                 cv2.imwrite(f'./data_set/{self.flag}_pic.png', img)
-        #                 self.flag += 1
-        #             # time.sleep(0.05)
-        #             count_frame += 1
-        #             # key = cv2.waitKey(10)  # 原来是10
-        #             if self.video_flag == 0:
-        #                 break
-        #     else:
-        #         break
 
     def stop_video(self):
         '''
@@ -299,7 +276,8 @@ class Mainwindows(QMainWindow):
         img_Image = QPixmap(img_path)
         self.ui.rcg_videoshow.setPixmap(img_Image)
 
-    def send_alarmmsg(self, data):
+    def send_alarmmsg(self):
+        data = self.most_pain_level
         if data == 'Severe' or data == 'Moderate':
             self.ctrl_treatment("alarm_on")
             time.sleep(5)
@@ -335,8 +313,7 @@ class Mainwindows(QMainWindow):
         # self.textBrowser.append(f'[result]疼痛程度最剧烈的是第{self.result[1] + 1}帧，等级为{self.result[2]}')
 
         # TODO 当没有使用到8266的时候 注释掉这个发送报警信号
-        # self.send_alarmmsg(self.most_pain_level)
-        # self.thread_show_mostimg()
+        # self.thread_send_alarmmsg()
 
     def set_tablewidget(self, res):
         '''
@@ -402,11 +379,21 @@ class Mainwindows(QMainWindow):
         except:
             pass
         finally:
-            img_path = f'./data_set/{self.most_pain_index}_pic.png'
+            files_path = f'./data_set/'
+            files = os.listdir(files_path)
+            for file in files:
+                if file.endswith(f'_{self.most_pain_index}_pic.png'):
+                    print(file)
+                    break
+            img_path = f'./data_set/{file}'
             img = cv2.imread(img_path)
             save_path = f'./pain_img/{name}_{self.most_pain_level}.png'
             # cv2.imwrite(save_path, img)
             cv2.imencode('.png', img)[1].tofile(save_path)
+            fin = open(img_path, 'rb')  # 'rb'加上才能将图片读取为二进制
+            img = fin.read()  # 将二进制数据读取到img中
+            fin.close()
+
         self.conn_mysql()
 
         my_query = f"SELECT * FROM patient where name = %s"
@@ -414,12 +401,12 @@ class Mainwindows(QMainWindow):
         res = self.cursor.fetchall()
 
         if res:
-            my_update = f"UPDATE patient SET painlevel = %s where name = %s"
-            self.cursor.execute(my_update, (self.most_pain_level, name))
+            my_update = f"UPDATE patient SET painlevel = %s,img = %s where name = %s"
+            self.cursor.execute(my_update, (self.most_pain_level, img, name))
             self.conn.commit()
         else:
-            my_insert = f"INSERT INTO patient(name,painlevel) values (%s,%s)"
-            self.cursor.execute(my_insert, (name, self.most_pain_level))
+            my_insert = f"INSERT INTO patient(name,painlevel,img) values (%s,%s,%s)"
+            self.cursor.execute(my_insert, (name, self.most_pain_level,img))
             self.conn.commit()
         self.conn.close()
 
@@ -430,11 +417,11 @@ class Mainwindows(QMainWindow):
         :return:
         '''
         try:
-            address = "192.168.1.104"  # 8266的服务器的ip地址
+            address = "192.168.1.152"  # 8266的服务器的ip地址
             port = 8266  # 8266的服务器的端口号
             self.buffsize = 1024  # 接收数据的缓存大小
             self.s = socket(AF_INET, SOCK_STREAM)
-            self.conn = ("192.168.1.107", 1234)
+            self.conn = ("192.168.1.140", 1234)
             self.s.connect((address, port))
             self.button_treatment_flag = None
             print('已经成功连接设备')
@@ -466,9 +453,15 @@ class Mainwindows(QMainWindow):
             else:
                 self.ui.dag_browser.setText("[success]查询成功！")
                 self.ui.dag_painlevel.setText(res[2])
-                # TODO 这里给图片加点儿东西
-                img_path = f'./pain_img/{patient_name}_{self.ui.dag_painlevel.text()}.png'
-                img_Image = QPixmap(img_path)
+                # 这里是从数据库读取图片
+                # img_path = f'./pain_img/{patient_name}_{self.ui.dag_painlevel.text()}.png'
+                self.cursor.execute("SELECT img FROM patient WHERE name = %s",[patient_name])
+                showimg_path = './read_from_mysql.png'
+                fout = open('read_from_mysql.png', 'wb')
+                fout.write(self.cursor.fetchone()[0])
+                fout.close()
+                self.cursor.close()
+                img_Image = QPixmap(showimg_path)
                 self.ui.dag_videoshow.setPixmap(img_Image)
                 self.ui.dag_videoshow.setScaledContents(True)
             self.conn.close()
@@ -638,7 +631,6 @@ class Mainwindows(QMainWindow):
         self.ui.trm_drug_mass.setText("")
         self.ui.trm_drug_speed.setText("")
 
-    # TODO 控制端的两个测试例子，这两个到时候往后挪动
     def button_medicare_ctrl(self):
         """
         控制按摩仪的程序
@@ -740,7 +732,6 @@ class Mainwindows(QMainWindow):
         except:
             self.ui.trm_browser.setText('[warning]未连接治疗仪，无法启动治疗...')
 
-    # TODO 控制端的两个测试例子，这两个到时候往后挪动
     def ctrl_treatment(self, data):
         """
         发送控制信息
@@ -753,6 +744,7 @@ class Mainwindows(QMainWindow):
     # 语音模块控制摄像头
     def listen_port(self):
         try:
+            # TODO：语音模块的COM口在这里修改
             ser = serial.Serial(port='COM11', baudrate=9600, bytesize=8, parity=serial.PARITY_NONE, stopbits=1,
                                 timeout=2)
             while True:
@@ -828,7 +820,9 @@ def index():
 
 # 封装MySQL操作方法
 def model(sql):
-    conn = pymysql.connect(user='root', password='980226', host='localhost', database='pain', charset='utf8mb4',
+    # TODO：修改数据库连接8.0.12
+    # 101.37.160.114
+    conn = pymysql.connect(user='zachary', password='980226', host='101.37.160.114', database='pain', charset='utf8mb4',
                            cursorclass=pymysql.cursors.DictCursor)
     try:
         cursor = conn.cursor()

@@ -95,12 +95,13 @@ def predict(model, filename):
 # Read picture then execute the exe to extract the landmarks from pic, next save result
 def execute_pic(in_dir, out_dir):
     """
-    该方法用于将in_dir的照片作为输入，执行exe，识别出特征点以及AU信息保存为csv
+        该方法用于将in_dir的照片作为输入，执行openface的exe，识别出特征点以及AU信息保存为csv
     :param in_dir: 输入的照片路径
     :param out_dir: 输出的csv路径
     :return: None
     """
     # 要执行的exe的路径
+    # TODO:这里修改OPENFACE的exe路径
     execute_path = r"E:\New_OpenFace\OpenFace-master_new\OpenFace-master\x64\Release\FeatureExtraction.exe"
 
     # 要执行的参数
