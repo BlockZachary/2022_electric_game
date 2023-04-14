@@ -1,6 +1,6 @@
 Input:E:\※学习资料※\postgraduate\22研电赛\220301pycharmproject_ui\data_set
 Input full path:E:\※学习资料※\postgraduate\22研电赛\220301pycharmproject_ui\data_set
-Camera parameters:500,500,320,240
+Camera parameters:625,625,400,300
 Output HOG:data_set.hog
 Output video:data_set.avi
 Output aligned directory:data_set_aligned

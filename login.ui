@@ -132,7 +132,7 @@ QPushButton:pressed{
      <string/>
     </property>
     <property name="icon">
-     <iconset resource="resource_login.qrc">
+     <iconset>
       <normaloff>:/icons/素材库/exit.ico</normaloff>:/icons/素材库/exit.ico</iconset>
     </property>
     <property name="iconSize">
@@ -247,7 +247,7 @@ QPushButton:pressed{
       <string/>
      </property>
      <property name="icon">
-      <iconset resource="resource_login.qrc">
+      <iconset>
        <normaloff>:/icons/素材库/login.ico</normaloff>:/icons/素材库/login.ico</iconset>
      </property>
      <property name="iconSize">
@@ -406,7 +406,7 @@ QPushButton:pressed{
       <string/>
      </property>
      <property name="icon">
-      <iconset resource="resource_login.qrc">
+      <iconset>
        <normaloff>:/icons/素材库/register-18-383390.png</normaloff>:/icons/素材库/register-18-383390.png</iconset>
      </property>
      <property name="iconSize">

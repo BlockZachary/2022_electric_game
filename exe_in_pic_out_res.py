@@ -101,7 +101,7 @@ def execute_pic(in_dir, out_dir):
     :return: None
     """
     # 要执行的exe的路径
-    # TODO:这里修改OPENFACE的exe路径
+    # TODO:这里修改OpenFace的exe路径
     execute_path = r"E:\New_OpenFace\OpenFace-master_new\OpenFace-master\x64\Release\FeatureExtraction.exe"
 
     # 要执行的参数
@@ -161,10 +161,10 @@ def cal_pain_intensity(AU_list):
     if au_intensity == 0:
         print(f"\tAU强度为{au_intensity},疼痛等级为：No Pain")
         return 'No'
-    elif 1 <= au_intensity <= 2:
+    elif 1 <= au_intensity <= 3:
         print(f"\tAU强度为{au_intensity},疼痛等级为：Weak Pain")
         return 'Weak'
-    elif 3 <= au_intensity <= 4:
+    elif 4 <= au_intensity <= 6:
         print(f"\tAU强度为{au_intensity},疼痛等级为：Moderate Pain")
         return 'Moderate'
     else:
@@ -178,6 +178,8 @@ def read_csv_output_result(filepath):
     :param filepath: csv文件的路径
     :return: 输出EAR值、AU43状态、AU状态、AU强度值、疼痛等级,并返回所有EAR值，保存至test_au.csv中
     '''
+    # TODO 这里可以修改眼睛睁开比的阈值
+    EAR_threshold = 0.26
     x_start = 335
     x_end = 346
     y_start = 403
@@ -212,7 +214,7 @@ def read_csv_output_result(filepath):
                 print(f"\tEAR值为：{ear_res}")
                 ear_data.append(ear_res)
 
-                if ear_res < 0.26:
+                if ear_res < EAR_threshold:
                     print("\tAU43 = 1，闭眼状态")
                     AU43 = 1
                 else:

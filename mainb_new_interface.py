@@ -126,7 +126,7 @@ class Mainwindows(QMainWindow):
         '''
         # TODO : 修改数据库的连接
         # 101.37.160.114
-        self.conn = pymysql.connect(host='101.37.160.114', user='zachary', password='980226', database='pain',
+        self.conn = pymysql.connect(host='localhost', user='root', password='980226', database='new_pain',
                                     use_unicode=True)
         self.cursor = self.conn.cursor()
 
@@ -161,9 +161,9 @@ class Mainwindows(QMainWindow):
         img_cycle = 30 # TODO 修改捕获图像的周期，单位：秒
         img_num = img_time*img_ret
         img_inter = img_cycle*img_ret
-        ret, self.image = self.cam.read()
+        ret, self.image = self.cam.read(0)
         # TODO 水平翻转 使用外接摄像头的时候注释掉下面这一行
-        self.image = cv2.flip(self.image, 1)
+        # self.image = cv2.flip(self.image, 1)
         height, width, bytesPerComponent = self.image.shape
         bytesPerLine = bytesPerComponent * width
 
@@ -179,7 +179,7 @@ class Mainwindows(QMainWindow):
 
         _img = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
         for (x, y, w, h) in faces:  # 在检测到的面部周围画框
-            cv2.rectangle(_img, (x, y), (x + w, y + h), (149, 237, 100), 2)
+            cv2.rectangle(_img, (x, y), (x + w, y + h), (149, 237, 100), 3)
         _img = QImage(_img.data, width, height, bytesPerLine, QImage.Format_RGB888)
         self.ui.rcg_videoshow.setPixmap(QPixmap.fromImage(_img))
         self.ui.rcg_videoshow.setScaledContents(True)
@@ -232,7 +232,7 @@ class Mainwindows(QMainWindow):
         self.camera_timer = QTimer()
         self.camera_timer.timeout.connect(self.show_image)
 
-        self.cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+        self.cam = cv2.VideoCapture(1, cv2.CAP_DSHOW)   # TODO 这里换内置外置摄像头，内置为0，外置为1
         self.cam.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         self.cam.set(cv2.CAP_PROP_FRAME_WIDTH, 800)  # set video width
         self.cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)  # set video height
@@ -296,6 +296,7 @@ class Mainwindows(QMainWindow):
         path_dir = os.path.abspath('./')  # 获取当前项目文件夹绝对路径
         print(path_dir)
         # in_dir = r"E:\New_OpenFace\Datasets\UNBC\Images\064-ak064\ak064t1afaff"  # 这个路径是你的待识别图像的路径，路径必须完整
+        # TODO 如果下面两行报错，那么需要修改成：in_dir = fr"{path_dir}\data_set" out_dir = fr"{path_dir}\result".
         in_dir = fr"{path_dir}data_set"
         # csv输出路径
         out_dir = fr"{path_dir}result"  # 这个是在当前项目文件夹下的result文件夹，路径必须是绝对路径
@@ -410,18 +411,18 @@ class Mainwindows(QMainWindow):
             self.conn.commit()
         self.conn.close()
 
-    # TODO 在这里修改ESP8266的ip
+    # TODO 在这里修改ESP8266和电脑的ip
     def esp8266_init(self):
         '''
         初始化连接ESP8266
         :return:
         '''
         try:
-            address = "192.168.1.152"  # 8266的服务器的ip地址
+            address = "192.168.1.169"  # 8266的服务器的ip地址
             port = 8266  # 8266的服务器的端口号
             self.buffsize = 1024  # 接收数据的缓存大小
             self.s = socket(AF_INET, SOCK_STREAM)
-            self.conn = ("192.168.1.140", 1234)
+            self.conn = ("192.168.1.170", 1234)
             self.s.connect((address, port))
             self.button_treatment_flag = None
             print('已经成功连接设备')
@@ -822,7 +823,7 @@ def index():
 def model(sql):
     # TODO：修改数据库连接8.0.12
     # 101.37.160.114
-    conn = pymysql.connect(user='zachary', password='980226', host='101.37.160.114', database='pain', charset='utf8mb4',
+    conn = pymysql.connect(user='root', password='980226', host='localhost', database='new_pain', charset='utf8mb4',
                            cursorclass=pymysql.cursors.DictCursor)
     try:
         cursor = conn.cursor()

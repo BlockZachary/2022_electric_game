@@ -993,7 +993,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.label_2.setText(_translate("MainWindow", "“小博”智能疼痛识别与干预系统"))
+        self.label_2.setText(_translate("MainWindow", "云边协同的智能疼痛识别与干预系统"))
         self.recognizers.setText(_translate("MainWindow", "识别"))
         self.diagnosers.setText(_translate("MainWindow", "诊断"))
         self.treatments.setText(_translate("MainWindow", "治疗"))
