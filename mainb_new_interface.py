@@ -232,7 +232,7 @@ class Mainwindows(QMainWindow):
         self.camera_timer = QTimer()
         self.camera_timer.timeout.connect(self.show_image)
 
-        self.cam = cv2.VideoCapture(1, cv2.CAP_DSHOW)   # TODO 这里换内置外置摄像头，内置为0，外置为1
+        self.cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)   # TODO 这里换内置外置摄像头，内置为0，外置为1
         self.cam.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         self.cam.set(cv2.CAP_PROP_FRAME_WIDTH, 800)  # set video width
         self.cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)  # set video height
