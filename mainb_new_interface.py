@@ -232,7 +232,7 @@ class Mainwindows(QMainWindow):
         self.camera_timer = QTimer()
         self.camera_timer.timeout.connect(self.show_image)
 
-        self.cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)   # TODO 这里换内置外置摄像头，内置为0，外置为1
+        self.cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # TODO 这里换内置外置摄像头，内置为0，外置为1
         self.cam.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         self.cam.set(cv2.CAP_PROP_FRAME_WIDTH, 800)  # set video width
         self.cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)  # set video height
@@ -259,7 +259,25 @@ class Mainwindows(QMainWindow):
         # self.ui.rcg_videoshow.clear()
         # self.ui.rcg_browser.setText(f'{time.strftime("%Y-%m-%d %X", time.localtime())} 拍摄图像结束！请点击疼痛表情识别！')
         self.ui.rcg_browser.setText(f'{time.strftime("%Y-%m-%d %X", time.localtime())} 拍摄图像结束！')
-        self.thread_show_mostimg()
+        # self.thread_show_mostimg()
+        self.ui.rcg_videoshow.clear()
+
+        item_no = QTableWidgetItem('')
+        item_no.setTextAlignment(Qt.AlignCenter | Qt.AlignBottom)
+        self.ui.rcg_tableWidget.setItem(0, 0, item_no)
+        item_weak = QTableWidgetItem('')
+        item_weak.setTextAlignment(Qt.AlignCenter | Qt.AlignBottom)
+        self.ui.rcg_tableWidget.setItem(1, 0, item_weak)
+        item_moderate = QTableWidgetItem('')
+        item_moderate.setTextAlignment(Qt.AlignCenter | Qt.AlignBottom)
+        self.ui.rcg_tableWidget.setItem(2, 0, item_moderate)
+        item_severe = QTableWidgetItem('')
+        item_severe.setTextAlignment(Qt.AlignCenter | Qt.AlignBottom)
+        self.ui.rcg_tableWidget.setItem(3, 0, item_severe)
+        item_accuracy = QTableWidgetItem('')
+        item_accuracy.setTextAlignment(Qt.AlignCenter | Qt.AlignBottom)
+        self.ui.rcg_tableWidget.setItem(4, 0, item_accuracy)
+        self.ui.rcg_browser.clear()
 
     def show_mostimg(self):
         '''
@@ -314,7 +332,9 @@ class Mainwindows(QMainWindow):
         # self.textBrowser.append(f'[result]疼痛程度最剧烈的是第{self.result[1] + 1}帧，等级为{self.result[2]}')
 
         # TODO 当没有使用到8266的时候 注释掉这个发送报警信号
-        # self.thread_send_alarmmsg()
+        self.thread_send_alarmmsg()
+
+        self.thread_show_mostimg()
 
     def set_tablewidget(self, res):
         '''
@@ -397,17 +417,17 @@ class Mainwindows(QMainWindow):
 
         self.conn_mysql()
 
-        my_query = f"SELECT * FROM patient where name = %s"
+        my_query = f"SELECT * FROM new_patient where name = %s"
         self.cursor.execute(my_query, [name])
         res = self.cursor.fetchall()
 
         if res:
-            my_update = f"UPDATE patient SET painlevel = %s,img = %s where name = %s"
+            my_update = f"UPDATE new_patient SET painlevel = %s,img = %s where name = %s"
             self.cursor.execute(my_update, (self.most_pain_level, img, name))
             self.conn.commit()
         else:
-            my_insert = f"INSERT INTO patient(name,painlevel,img) values (%s,%s,%s)"
-            self.cursor.execute(my_insert, (name, self.most_pain_level,img))
+            my_insert = f"INSERT INTO new_patient(name,painlevel,img) values (%s,%s,%s)"
+            self.cursor.execute(my_insert, (name, self.most_pain_level, img))
             self.conn.commit()
         self.conn.close()
 
@@ -418,11 +438,11 @@ class Mainwindows(QMainWindow):
         :return:
         '''
         try:
-            address = "192.168.1.169"  # 8266的服务器的ip地址
+            address = "192.168.1.142"  # 8266的服务器的ip地址
             port = 8266  # 8266的服务器的端口号
             self.buffsize = 1024  # 接收数据的缓存大小
             self.s = socket(AF_INET, SOCK_STREAM)
-            self.conn = ("192.168.1.170", 1234)
+            self.conn = ("192.168.1.141", 1234)
             self.s.connect((address, port))
             self.button_treatment_flag = None
             print('已经成功连接设备')
@@ -444,7 +464,7 @@ class Mainwindows(QMainWindow):
             self.ui.dag_videoshow.clear()
             return
         else:
-            my_query = f"SELECT * FROM patient where name = %s"
+            my_query = f"SELECT * FROM new_patient where name = %s"
             self.cursor.execute(my_query, [patient_name])
             res = self.cursor.fetchone()
             if not res:
@@ -456,7 +476,7 @@ class Mainwindows(QMainWindow):
                 self.ui.dag_painlevel.setText(res[2])
                 # 这里是从数据库读取图片
                 # img_path = f'./pain_img/{patient_name}_{self.ui.dag_painlevel.text()}.png'
-                self.cursor.execute("SELECT img FROM patient WHERE name = %s",[patient_name])
+                self.cursor.execute("SELECT img FROM new_patient WHERE name = %s", [patient_name])
                 showimg_path = './read_from_mysql.png'
                 fout = open('read_from_mysql.png', 'wb')
                 fout.write(self.cursor.fetchone()[0])
@@ -567,18 +587,18 @@ class Mainwindows(QMainWindow):
         if not remark:
             remark = 'NULL'
 
-        my_query = f"SELECT * FROM patient where name = %s"
+        my_query = f"SELECT * FROM new_patient where name = %s"
         self.cursor.execute(my_query, [name])
         res = self.cursor.fetchall()
 
         if res:
-            my_update = f"UPDATE patient SET painlevel = %s,gender = %s,mechine = %s,mechine_time = %s,drug = %s,remark = %s where name = %s"
+            my_update = f"UPDATE new_patient SET painlevel = %s,gender = %s,mechine = %s,mechine_time = %s,drug = %s,remark = %s where name = %s"
             print(my_update)
             print((painlevel, gender, mechine, mechine_time, drug, remark, name))
             self.cursor.execute(my_update, (painlevel, gender, mechine, mechine_time, drug, remark, name))
             self.conn.commit()
         else:
-            my_insert = f"INSERT INTO patient(name,painlevel,gender,mechine,mechine_time,drug,remark) values (%s,%s,%s,%s,%s,%s,%s)"
+            my_insert = f"INSERT INTO new_patient(name,painlevel,gender,mechine,mechine_time,drug,remark) values (%s,%s,%s,%s,%s,%s,%s)"
             self.cursor.execute(my_insert, (name, painlevel, gender, mechine, mechine_time, drug, remark))
             self.conn.commit()
         self.conn.close()
@@ -596,7 +616,7 @@ class Mainwindows(QMainWindow):
             self.ui.trm_browser.setText("[warning]请输入患者姓名，再点击查询按钮...")
             return
         else:
-            my_query = f"SELECT * FROM patient where name = %s"
+            my_query = f"SELECT * FROM new_patient where name = %s"
             self.cursor.execute(my_query, [patient_name])
             res = self.cursor.fetchone()
             if not res:
@@ -810,7 +830,7 @@ def index():
     # 1.获取所有的留言板数据
 
     # 2.把数据分配到模板中（Html页面渲染）
-    data1 = model('select * from patient')
+    data1 = model('select * from new_patient')
     data2 = model('select * from user')
     data = []
     data.append(data1)
